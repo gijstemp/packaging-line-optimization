@@ -73,8 +73,9 @@ class randomGenerator:
     This class generates a random value using a specified function and arguments.
     """
 
-    function: Callable
-    kwargs: Dict[str, Any]
+    def __init__(self, function, **kwargs) -> None:
+        self.function = function
+        self.kwargs = kwargs
 
     def new(self) -> Union[float, int]:
         """
