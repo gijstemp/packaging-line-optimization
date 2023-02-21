@@ -2,16 +2,19 @@ from dataclasses import dataclass
 from typing import List, Dict, Callable, Union, Any, Tuple
 from state import State
 
-# Configuration
+
 class MachineConfigError(Exception):
+    """
+    Custom exception for configuration errors in machines.
+    """
+
     pass
 
 
 @dataclass
 class MachineConfig:
     """
-    This is what configures the machine to run at a certain speed given
-    the current state for a chosen duration.
+    This class configures a machine to run at a certain speed, given the current state and duration.
     """
 
     name: str
@@ -19,7 +22,13 @@ class MachineConfig:
 
     def state(self, state_id: int) -> State:
         """
-        Searches for the next state called from the possibilities.
+        Returns the state with the specified ID from the list of states.
+
+        Args:
+            state_id (int): ID of the state to return.
+
+        Raises:
+            MachineConfigError: If the specified state ID is not found in the list of states.
         """
         try:
             return next(
@@ -32,34 +41,43 @@ class MachineConfig:
 
     def next_state_id(self, current_state: int) -> int:
         """
-        Returns the next state called from the possibilities.
+        Returns the ID of the next state that the machine will transition to from the current state.
+
+        Args:
+            current_state (int): ID of the current state.
         """
         return self.state(current_state).next_state_id()
 
     def new_speed(self, current_state: int) -> float:
         """
-        Returns the new speed for producing the units called from the distribution of possible speeds.
+        Returns a new speed for producing the units based on the distribution of possible speeds in the current state.
+
+        Args:
+            current_state (int): ID of the current state.
         """
         return self.state(current_state).new_speed()
 
     def new_duration(self, current_state: int) -> int:
         """
-        Returns the new duration that the machine will be in the state called from the distribution of possible speeds.
+        Returns a new duration for the machine to be in the current state based on the distribution of possible durations.
+
+        Args:
+            current_state (int): ID of the current state.
         """
         return max([1, self.state(current_state).new_duration()])
 
 
+@dataclass
 class randomGenerator:
     """
-    This ensures that a random value can be picked when asked for.
+    This class generates a random value using a specified function and arguments.
     """
 
-    def __init__(self, function, **kwargs) -> None:
-        self.function = function
-        self.kwargs = kwargs
+    function: Callable
+    kwargs: Dict[str, Any]
 
     def new(self) -> Union[float, int]:
         """
-        Using the given functiona and keyword arguments, a random value is returned.
+        Returns a new random value based on the specified function and arguments.
         """
         return self.function(**self.kwargs)[0]
