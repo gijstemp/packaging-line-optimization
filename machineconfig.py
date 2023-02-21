@@ -49,7 +49,7 @@ class MachineConfig:
         return max([1, self.state(current_state).new_duration()])
 
 
-class random_generator:
+class randomGenerator:
     """
     This ensures that a random value can be picked when asked for.
     """

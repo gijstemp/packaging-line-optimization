@@ -22,6 +22,7 @@ class Machine(object):
         initial_state: int,
         in_q: Buffer,
         out_q: Buffer,
+        event_list: list,
     ):
         self.env = env
         self.name = name
@@ -34,7 +35,7 @@ class Machine(object):
         self.idle_parts = 0
         self.tailback = 0
         self.lack = 0
-
+        self.event_list = event_list
         # Start the producing process
         self.process = env.process(self.produce())
 
@@ -69,7 +70,7 @@ class Machine(object):
             if self.env.now == last_state_switch + time_in_state:
                 self.state, time_in_state = self.get_next_state()
                 last_state_switch = self.env.now
-            event_list.append(
+            self.event_list.append(
                 {
                     "Time": self.env.now,
                     "Machine": self.name,
@@ -82,7 +83,7 @@ class Machine(object):
                     "Simulation": None,
                 }
             )
-            yield env.timeout(1)
+            yield self.env.timeout(1)
 
     def get_speed(self):
         speed = 0
