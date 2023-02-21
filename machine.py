@@ -6,9 +6,9 @@ from buffer import Buffer
 from state import State
 from machineconfig import MachineConfig
 
-# Class setup for a Machine
+
 @dataclass
-class Machine(object):
+class Machine:
     """
     A machine produces units at a fixed processing speed,
     takes units from a store before and puts units into a store after.
@@ -24,6 +24,17 @@ class Machine(object):
         out_q: Buffer,
         event_list: list,
     ):
+        """
+        Initializes the Machine instance.
+
+        :param env: The simulation environment.
+        :param name: The name of the machine.
+        :param machine_config: The machine configuration containing its states.
+        :param initial_state: The initial state of the machine.
+        :param in_q: The buffer from which the machine takes parts.
+        :param out_q: The buffer to which the machine puts parts.
+        :param event_list: The list of events in the simulation.
+        """
         self.env = env
         self.name = name
         self.machine_config = machine_config
@@ -41,12 +52,10 @@ class Machine(object):
 
     def produce(self):
         """
-        Produce parts as long as the simulation runs.
-        It is prone to breaking down and being repaired.
+        The machine produces parts as long as the simulation runs. It is prone to breaking down and being repaired.
         """
         last_state_switch = self.env.now
         time_in_state = self.state.new_duration()
-        # print(f"init {self.name} in state {self.state.id} for {time_in_state} minutes")
         while True:
             pspeed = self.get_speed()
             # Update count and what goes out and in buffers
@@ -86,15 +95,29 @@ class Machine(object):
             yield self.env.timeout(1)
 
     def get_speed(self):
+        """
+        Get the processing speed of the machine, accounting for tailbacks and lack of parts.
+
+        Returns:
+            speed (float): The processing speed of the machine.
+        """
         speed = 0
         if not (self.tailback or self.lack):
             speed = self.state.new_speed()
         return speed
 
     def get_next_state(self) -> Tuple[int, int]:
+        """
+        Get the next state for the machine at random, based on the transition probabilities
+        specified in the machine configuration.
+
+        Returns:
+            next_state_id (int): The ID of the next state.
+            time_in_state (int): The duration of time the machine will spend in the next state.
+        """
         # Select a state at random with given probabilities
         next_state_id = self.state.next_state_id()
         next_state = self.machine_config.state(next_state_id)
-        # Find time in state (Complete and fill in correct params)
+        # Find time in state
         time_in_state = next_state.new_duration()
         return next_state, time_in_state
