@@ -11,7 +11,17 @@ from datetime import datetime
 RUN_TIME = 481
 
 
-def run_sim(i):
+def run_sim(i: int) -> list:
+    """
+    Runs the simulation for one iteration with the given simulation index and returns the event log.
+
+    Args:
+        i (int): The simulation index.
+
+    Returns:
+        list: The event log for the simulation.
+    """
+
     # The buffers
     buffer_0 = Buffer("Buffer_0", current_parts=np.inf)
     buffer_1 = Buffer("Buffer_1", max_capacity=3256)  #
@@ -71,9 +81,14 @@ for i in range(num_sim):
     run_sim(i)
     print(datetime.now() - sim_start)
 
-# To see the total time of all simulations
+# Show total time of all simulations
 print(f"The total runtime for {num_sim} is {datetime.now() - begin_time}")
 
+# Create a Pandas DataFrame from the event list
 log = pd.DataFrame(event_list)
+
+# Fill in the missing values in the "Simulation" column using forward filling
 log["Simulation"].ffill(inplace=True)
+
+# Save the log DataFrame to a CSV file
 log.to_csv("data/sim_log.csv")
